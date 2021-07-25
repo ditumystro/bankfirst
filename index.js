@@ -23,7 +23,7 @@ app.get("/api/v1/accounts", (request, response) => {
 
 //-- route to get the solde of an account
 
-app.get("/api/v1/accounts/",(request, response) => {
+app.get("/api/v1/solde",(request, response) => {
     const {accountnumber} = request.body
     pool.query('SELECT solde FROM bank_account where accountnumber = $1 ',
         [accountnumber],
@@ -39,7 +39,7 @@ app.get("/api/v1/accounts/",(request, response) => {
  *
 route to create bank account
  */
-app.post("/api/v1/accounts",(request, response) => {
+app.post("/api/v1/account",(request, response) => {
     const {accountnumber, code_user, solde, type} = request.body
     pool.query(
         'INSERT INTO bank_account (accountnumber, code_user, solde, type) VALUES ($1, $2, $3, $4)',
