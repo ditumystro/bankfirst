@@ -35,8 +35,10 @@ app.get("/api/v1/accounts/",(request, response) => {
     })
 });
 
-//-- route to create bank account
-
+/*
+ *
+route to create bank account
+ */
 app.post("/api/v1/accounts",(request, response) => {
     const {accountnumber, code_user, solde, type} = request.body
     pool.query(
@@ -51,8 +53,11 @@ app.post("/api/v1/accounts",(request, response) => {
     )
 });
 
-//-- route to create a user or client
 
+/*
+ * route to create a user or client
+ *
+ */
 app.post("/api/v1/users",(request, response) => {
     const {full_name, email, password, phone,address} = request.body
     pool.query(
@@ -73,7 +78,10 @@ app.post("/api/v1/users",(request, response) => {
 });*/
 
 
-/*route for transfer sending*/
+/*
+ * route for funds sending
+ *
+ */
 app.post("/api/v1/send",(request, response) => {
 
     const {amount, accountsender, accountreceiver} = request.body
@@ -103,9 +111,43 @@ app.post("/api/v1/send",(request, response) => {
             },
         )
 
-        await pool.end()
     })()
 
+})
+
+/*
+* route for funds receiving
+*
+*/
+app.post("/api/v1/receive",(request, response) => {
+
+    const {amount, accountsender, accountreceiver} = request.body
+    const date = new Date()
+    const type = "transfer"
+
+    ;(async () => {
+        console.log('starting async query')
+        const result = await pool.query(
+            'INSERT INTO transaction (type, amount, date, accountsender,accountreceiver) VALUES ($1, $2, $3, $4, $5)',
+            [type, amount, date, accountsender, accountreceiver],
+            (error) => {
+                if (error) {
+                    throw error
+                }
+
+            },
+        )
+
+        pool.query(
+            'UPDATE bank_account SET solde = solde + $1 WHERE accountnumber = $2', [amount, accountsender],
+            (error) => {
+                if (error) {
+                    throw error
+                }
+                response.status(201).json({status: 'success', message: 'transaction done!'})
+            },
+        )
+    })()
 })
 
 // Start server
