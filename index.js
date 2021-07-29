@@ -110,7 +110,16 @@ app.post("/api/v1/send",(request, response) => {
                 response.status(201).json({status: 'success', message: 'transaction done!'})
             },
         )
-
+        
+        pool.query(
+            'UPDATE bank_account SET solde = solde + $1 WHERE accountnumber = $2', [amount, accountreceiver],
+            (error) => {
+                if (error) {
+                    throw error
+                }
+                response.status(201).json({status: 'success', message: 'transaction done!'})
+            },
+        )
     })()
 
 })
