@@ -89,6 +89,91 @@ app.post("/api/v1/users",(request, response) => {
 });*/
 
 
+app.post("/api/v1/sendInside",(request, response) => {
+
+    const {amount, accountsender, accountreceiver} = request.body
+    const date = new Date()
+    const type = "transfer"
+    
+    ;(async () => {
+        console.log('starting async query')
+
+        const result1 = await pool.query(
+            'SELECT accountnumber from bank_account where (accountnumber) VALUES ($1)',
+            [accountsender],
+            (error) => {
+                if (error) {
+                    throw error
+                    response.status(401).json({status: 'Error', message: 'accountnumber for sender not found!'})
+                }
+
+            },
+        )
+
+        const result2 = await pool.query(
+            'SELECT accountnumber from bank_account where (accountnumber) VALUES ($1)',
+            [accountreceiver],
+            (error) => {
+                if (error) {
+                    throw error
+                    response.status(401).json({status: 'Error', message: 'accountnumber for receiver not found!'})
+                }
+
+            },
+        )
+
+        const result3 = await pool.query(
+            'SELECT solde from bank_account where (accountnumber) VALUES ($1)',
+            [accountsender],
+            (error) => {
+                if (result3 < amount) {
+                    throw error
+                    response.status(401).json({status: 'Error', message: 'Amount for sender is not enough!'})
+                }
+
+            },
+        )
+        
+        const result = await pool.query(
+            'INSERT INTO transaction (type, amount, date, accountsender,accountreceiver) VALUES ($1, $2, $3, $4, $5)',
+            [type, amount, date, accountsender, accountreceiver],
+            (error) => {
+                if (error) {
+                    throw error
+                    
+                }
+
+            },
+        )
+
+        pool.query(
+            'UPDATE bank_account SET solde = solde - $1 WHERE accountnumber = $2', [amount, accountsender],
+            (error) => {
+                if (error) {
+                    throw error
+                }
+
+            },
+        )
+
+
+
+        pool.query(
+
+               'UPDATE bank_account SET solde = solde + $1 WHERE accountnumber = $2', [amount, accountreceiver],
+        (error) => {
+            if (error) {
+                throw error
+            }
+            response.status(201).json({status: 'success', message: 'Transaction done!'})
+        },
+
+        )
+
+    })()
+
+})
+
 /*
  * route for funds sending
  *
