@@ -139,7 +139,7 @@ app.post("/api/v1/receive",(request, response) => {
         )
 
         pool.query(
-            'UPDATE bank_account SET solde = solde + $1 WHERE accountnumber = $2', [amount, accountsender],
+            'UPDATE bank_account SET solde = solde + $1 WHERE accountnumber = $2', [amount, accountreceiver],
             (error) => {
                 if (error) {
                     throw error
