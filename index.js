@@ -21,6 +21,17 @@ app.get("/api/v1/accounts", (request, response) => {
     })
 });
 
+//--route to get all transactions
+
+app.get("/api/v1/transactions", (request, response) => {
+    pool.query('SELECT * FROM transactions', (error, results) => {
+        if (error) {
+            throw error
+        }
+        response.status(200).json(results.rows)
+    })
+});
+
 //-- route to get the solde of an account
 
 app.get("/api/v1/solde",(request, response) => {
